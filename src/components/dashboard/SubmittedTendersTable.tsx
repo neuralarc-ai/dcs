@@ -68,6 +68,8 @@ export default function SubmittedTendersTable({ tenders }: SubmittedTendersTable
                       className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:text-green-600 hover:border-green-200 hover:bg-green-50 transition-all group"
                       target="_blank"
                       rel="noopener noreferrer"
+                      download={tender.document_name}
+                      title="Click to view or download"
                     >
                       <RiDownloadLine className="text-gray-400 group-hover:text-green-500" />
                       {tender.document_name}

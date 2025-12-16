@@ -21,8 +21,11 @@ import Modal from '@/components/ui/Modal';
 import { Tender, SubmittedTender } from '@/types';
 import { supabase } from '@/lib/supabase';
 
+import AdminDashboard from '@/components/admin/AdminDashboard';
+
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<'client' | 'admin' | null>(null);
   const [activeTab, setActiveTab] = useState('tenders');
   const [selectedTender, setSelectedTender] = useState<Tender | null>(null);
   
@@ -69,10 +72,28 @@ export default function Home() {
     };
   }, [isAuthenticated, activeTab]);
 
+  const handleLogin = (role: 'client' | 'admin') => {
+    setIsAuthenticated(true);
+    setUserRole(role);
+  };
+
   if (!isAuthenticated) {
-    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+    return <LoginScreen onLogin={handleLogin} />;
   }
 
+  // Admin View
+  if (userRole === 'admin') {
+    return (
+      <AdminDashboard 
+        onLogout={() => {
+          setIsAuthenticated(false);
+          setUserRole(null);
+        }} 
+      />
+    );
+  }
+
+  // Client View (DCS)
   const activeTendersCount = tenders.filter(t => new Date(t.deadline) > new Date()).length;
   const completedTendersCount = tenders.filter(t => t.status === 'submitted').length;
 
@@ -124,6 +145,7 @@ export default function Home() {
       <DashboardLayout
         onLogout={() => {
           setIsAuthenticated(false);
+          setUserRole(null);
           setActiveTab('tenders');
         }}
         activeTab={activeTab}

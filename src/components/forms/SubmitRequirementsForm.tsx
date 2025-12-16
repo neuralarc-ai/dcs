@@ -16,6 +16,8 @@ import { Button } from '../ui/button';
 import { CustomDateTimePicker } from '../ui/CustomDateTimePicker';
 import { supabase } from '@/lib/supabase';
 
+import SubmissionHistory from '../dashboard/SubmissionHistory';
+
 export default function SubmitRequirementsForm() {
   const [files, setFiles] = useState<File[]>([]);
   const [date, setDate] = useState<Date>();
@@ -23,6 +25,7 @@ export default function SubmitRequirementsForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0); // State to trigger history refresh
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +106,7 @@ export default function SubmitRequirementsForm() {
       setDate(undefined);
       setTime('12:00');
       (e.target as HTMLFormElement).reset();
+      setRefreshKey(prev => prev + 1); // Trigger history table refresh
       
       setTimeout(() => setIsSuccess(false), 5000);
     } catch (err: unknown) {
@@ -230,6 +234,8 @@ export default function SubmitRequirementsForm() {
           </div>
         )}
       </div>
+
+      <SubmissionHistory keyProp={refreshKey} />
     </div>
   );
 }

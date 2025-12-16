@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 import { supabase } from '@/lib/supabase';
 
 interface LoginScreenProps {
-  onLogin: () => void;
+  onLogin: (role: 'client' | 'admin') => void;
 }
 
 export default function LoginScreen({ onLogin }: LoginScreenProps) {
@@ -20,6 +20,13 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     setError('');
     setIsLoading(true);
 
+    // Hardcoded check for Admin (0000)
+    if (pin === '0000') {
+      setIsLoading(false);
+      onLogin('admin');
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('app_settings')
@@ -30,7 +37,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       if (error) throw error;
 
       if (data && data.value === pin) {
-        onLogin();
+        onLogin('client');
       } else {
         setError('Invalid PIN. Please try again.');
         setPin('');
@@ -41,7 +48,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       console.error('Login error:', err);
       // Fallback for demo if DB not connected/setup yet
       if (pin === '1111') {
-        onLogin();
+        onLogin('client');
       } else {
         setError('Connection error or Invalid PIN.');
       }
