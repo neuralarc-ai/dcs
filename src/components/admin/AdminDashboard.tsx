@@ -8,7 +8,7 @@ import {
   RiLogoutBoxLine,
   RiShieldUserLine
 } from 'react-icons/ri';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import IncomingRequestsTable from './IncomingRequestsTable';
 
 import AdminTendersTable from './AdminTendersTable';

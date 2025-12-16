@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiUploadCloud2Line, RiFileTextLine, RiCloseLine } from 'react-icons/ri';
 import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import { Label } from '@/components/ui/label';
 import { Tender } from '@/types';

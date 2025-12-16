@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { RiFileTextLine, RiTimeLine, RiDownloadLine, RiCheckLine, RiCloseLine } from 'react-icons/ri';
 import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 interface RequirementSubmission {
   id: string;

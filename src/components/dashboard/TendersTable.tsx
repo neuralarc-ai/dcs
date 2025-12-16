@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { RiTimeLine, RiEyeLine, RiCheckboxCircleLine } from 'react-icons/ri';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 import { Tender } from '@/types';
 
 interface TendersTableProps {

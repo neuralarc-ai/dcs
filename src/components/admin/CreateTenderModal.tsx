@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiAddLine, RiCalendarLine, RiMoneyDollarCircleLine, RiFileTextLine } from 'react-icons/ri';
 import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
