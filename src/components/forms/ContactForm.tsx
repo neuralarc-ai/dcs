@@ -28,6 +28,7 @@ export default function ContactForm() {
     const message = formData.get('message') as string;
     
     try {
+      // 1. Save to Supabase
       const { error: insertError } = await supabase
         .from('contact_messages')
         .insert({
@@ -36,6 +37,21 @@ export default function ContactForm() {
         });
 
       if (insertError) throw insertError;
+
+      // 2. Send Email via API Route
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ subject, message }),
+      });
+
+      if (!response.ok) {
+        console.warn('Failed to send email notification');
+        // We don't throw here to avoid showing an error if the DB save worked but email failed
+        // unless you want strict consistency. For now, DB success is "success".
+      }
 
       setIsSuccess(true);
       (e.target as HTMLFormElement).reset();
@@ -62,19 +78,19 @@ export default function ContactForm() {
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center hover:shadow-md transition-shadow">
             <RiMailLine className="w-8 h-8 text-green-600 mx-auto mb-3" />
             <h4 className="font-semibold text-gray-900 mb-1">Email</h4>
-            <p className="text-gray-600 text-sm">tenders@dcs.com</p>
+            <p className="text-gray-600 text-sm">hello@neuralarc.ai</p>
           </div>
           
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center hover:shadow-md transition-shadow">
             <RiPhoneLine className="w-8 h-8 text-green-600 mx-auto mb-3" />
             <h4 className="font-semibold text-gray-900 mb-1">Phone</h4>
-            <p className="text-gray-600 text-sm">+1 (555) 123-4567</p>
+            <p className="text-gray-600 text-sm">+971 55 480 0720</p>
           </div>
           
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center hover:shadow-md transition-shadow">
             <RiTimeLine className="w-8 h-8 text-green-600 mx-auto mb-3" />
             <h4 className="font-semibold text-gray-900 mb-1">Business Hours</h4>
-            <p className="text-gray-600 text-sm">Mon - Fri: 9:00 AM - 6:00 PM</p>
+            <p className="text-gray-600 text-sm">9.30AM IST - 6.30PM IST</p>
           </div>
         </div>
 
