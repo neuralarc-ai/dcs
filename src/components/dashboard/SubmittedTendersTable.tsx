@@ -13,32 +13,24 @@ export default function SubmittedTendersTable({ tenders }: SubmittedTendersTable
   const [, setTick] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => setTick(t => t + 1), 60000);
+    // Update timer every second
+    const timer = setInterval(() => setTick(t => t + 1), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const getTimeRemaining = (deadline: string) => {
+  const getTimeParts = (deadline: string) => {
     const now = new Date();
     const end = new Date(deadline);
     const diff = end.getTime() - now.getTime();
     
-    if (diff < 0) return { text: 'Expired', class: 'bg-gray-100 text-gray-500' };
+    if (diff < 0) return null;
     
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    let text = '';
-    let colorClass = 'bg-green-100 text-green-700';
-
-    if (days > 0) text = `${days}d ${hours}h`;
-    else if (hours > 0) text = `${hours}h ${minutes}m`;
-    else text = `${minutes}m`;
-
-    if (days < 2) colorClass = 'bg-red-100 text-red-700';
-    else if (days < 5) colorClass = 'bg-yellow-100 text-yellow-800';
-
-    return { text, class: colorClass };
+    return { days, hours, minutes, seconds };
   };
 
   return (
@@ -60,7 +52,7 @@ export default function SubmittedTendersTable({ tenders }: SubmittedTendersTable
           </thead>
           <tbody className="divide-y divide-gray-100">
             {tenders.map((tender) => {
-              const timeRemaining = getTimeRemaining(tender.deadline);
+              const parts = getTimeParts(tender.deadline);
               
               return (
                 <tr key={tender.id} className="hover:bg-gray-50 transition-colors">
@@ -85,10 +77,34 @@ export default function SubmittedTendersTable({ tenders }: SubmittedTendersTable
                     {format(new Date(tender.deadline), 'MMM d, yyyy HH:mm')}
                   </td>
                   <td className="p-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap ${timeRemaining.class}`}>
-                      <RiTimeLine size={14} />
-                      {timeRemaining.text}
-                    </span>
+                    {parts ? (
+                      <div className="inline-flex items-center gap-1.5 font-mono bg-gray-50 text-gray-900 px-3 py-2 rounded-lg border border-gray-200">
+                        <div className="flex flex-col items-center min-w-[20px]">
+                          <span className="text-lg font-bold leading-none">{parts.days}</span>
+                          <span className="text-[9px] uppercase text-gray-500 font-bold tracking-wider mt-0.5">Day</span>
+                        </div>
+                        <span className="text-lg font-bold text-gray-300 pb-3">:</span>
+                        <div className="flex flex-col items-center min-w-[20px]">
+                          <span className="text-lg font-bold leading-none">{parts.hours.toString().padStart(2, '0')}</span>
+                          <span className="text-[9px] uppercase text-gray-500 font-bold tracking-wider mt-0.5">Hr</span>
+                        </div>
+                        <span className="text-lg font-bold text-gray-300 pb-3">:</span>
+                        <div className="flex flex-col items-center min-w-[20px]">
+                          <span className="text-lg font-bold leading-none">{parts.minutes.toString().padStart(2, '0')}</span>
+                          <span className="text-[9px] uppercase text-gray-500 font-bold tracking-wider mt-0.5">Min</span>
+                        </div>
+                        <span className="text-lg font-bold text-gray-300 pb-3">:</span>
+                        <div className="flex flex-col items-center min-w-[20px]">
+                          <span className="text-lg font-bold leading-none">{parts.seconds.toString().padStart(2, '0')}</span>
+                          <span className="text-[9px] uppercase text-gray-500 font-bold tracking-wider mt-0.5">Sec</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                        <RiTimeLine size={14} />
+                        Expired
+                      </span>
+                    )}
                   </td>
                 </tr>
               );

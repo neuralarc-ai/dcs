@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-/* @plugin "tailwindcss-animate"; */
+@plugin "tailwindcss-animate";
+@plugin "daisyui";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
