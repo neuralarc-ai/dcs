@@ -1,0 +1,274 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Helium AI">
+    <meta name="description" content="DCS Tender Portal - Secure tender management system">
+    <title>DCS Tender Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="logo-section">
+                <div class="logo-circle">
+                    <i data-lucide="file-text" class="logo-icon"></i>
+                </div>
+                <h1>DCS Tender Portal</h1>
+                <p class="subtitle">Secure Access</p>
+            </div>
+            
+            <div class="login-form">
+                <label for="pinInput">Enter 4-Digit PIN</label>
+                <div class="pin-input-container">
+                    <input type="password" id="pinInput" maxlength="4" placeholder="••••" autocomplete="off">
+                    <button type="button" id="togglePin" class="toggle-pin">
+                        <i data-lucide="eye"></i>
+                    </button>
+                </div>
+                <button id="loginBtn" class="btn-primary">
+                    <i data-lucide="log-in"></i>
+                    <span>Login</span>
+                </button>
+                <div id="loginError" class="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboardScreen" class="screen">
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="logo-small">
+                        <i data-lucide="file-text"></i>
+                    </div>
+                    <h2>DCS Tender Portal</h2>
+                </div>
+                <button id="logoutBtn" class="btn-logout">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <nav class="tabs">
+                <button class="tab active" data-tab="tenders">
+                    <i data-lucide="folder-open"></i>
+                    <span>Active Tenders</span>
+                </button>
+                <button class="tab" data-tab="submitted">
+                    <i data-lucide="file-check"></i>
+                    <span>Submitted Tenders</span>
+                </button>
+                <button class="tab" data-tab="submit">
+                    <i data-lucide="upload"></i>
+                    <span>Submit Requirements</span>
+                </button>
+                <button class="tab" data-tab="contact">
+                    <i data-lucide="message-circle"></i>
+                    <span>Contact Us</span>
+                </button>
+            </nav>
+
+            <!-- Tenders Tab -->
+            <div id="tendersTab" class="tab-content active">
+                <div class="content-header">
+                    <h3>Active Tenders & RFPs</h3>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <i data-lucide="clock"></i>
+                            <div>
+                                <span class="stat-value" id="activeTenders">0</span>
+                                <span class="stat-label">Active</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i data-lucide="check-circle"></i>
+                            <div>
+                                <span class="stat-value" id="completedTenders">0</span>
+                                <span class="stat-label">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="tender-table">
+                        <thead>
+                            <tr>
+                                <th>Date Submitted</th>
+                                <th>Tender / RFP Name</th>
+                                <th>Deadline</th>
+                                <th>Time Remaining</th>
+                                <th>Quoted Amount</th>
+                                <th>Submission Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tenderTableBody">
+                            <!-- Dynamic content will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Submitted Tenders Tab -->
+            <div id="submittedTab" class="tab-content">
+                <div class="content-header">
+                    <h3>Your Submitted Tenders</h3>
+                    <p class="subtitle">Track tenders you've submitted to us with document links and deadlines</p>
+                </div>
+
+                <div class="table-container">
+                    <table class="tender-table">
+                        <thead>
+                            <tr>
+                                <th>Date Submitted</th>
+                                <th>Tender / RFP Name</th>
+                                <th>Document</th>
+                                <th>Deadline</th>
+                                <th>Time Remaining</th>
+                            </tr>
+                        </thead>
+                        <tbody id="submittedTenderTableBody">
+                            <!-- Dynamic content will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Submit Requirements Tab -->
+            <div id="submitTab" class="tab-content">
+                <div class="content-header">
+                    <h3>Submit New Tender Requirements</h3>
+                    <p class="subtitle">Upload tender documents and requirements for our team to review</p>
+                </div>
+
+                <div class="form-container">
+                    <form id="submitForm">
+                        <div class="form-group">
+                            <label for="tenderName">
+                                <i data-lucide="file-text"></i>
+                                Tender / RFP Name
+                            </label>
+                            <input type="text" id="tenderName" placeholder="Enter tender or RFP name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deadline">
+                                <i data-lucide="calendar"></i>
+                                Submission Deadline
+                            </label>
+                            <input type="datetime-local" id="deadline" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">
+                                <i data-lucide="align-left"></i>
+                                Description / Notes
+                            </label>
+                            <textarea id="description" rows="4" placeholder="Add any additional details or requirements"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fileUpload">
+                                <i data-lucide="paperclip"></i>
+                                Upload Documents
+                            </label>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <input type="file" id="fileUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                <div class="upload-placeholder">
+                                    <i data-lucide="upload-cloud"></i>
+                                    <p>Click to upload or drag and drop</p>
+                                    <span>PDF, DOC, DOCX, XLS, XLSX (Max 10MB each)</span>
+                                </div>
+                                <div id="fileList" class="file-list"></div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            <i data-lucide="send"></i>
+                            <span>Submit Requirements</span>
+                        </button>
+                    </form>
+
+                    <div id="submitSuccess" class="success-message"></div>
+                </div>
+            </div>
+
+            <!-- Contact Us Tab -->
+            <div id="contactTab" class="tab-content">
+                <div class="content-header">
+                    <h3>Contact Us</h3>
+                    <p class="subtitle">Have questions? We're here to help</p>
+                </div>
+
+                <div class="contact-container">
+                    <div class="contact-info">
+                        <div class="contact-card">
+                            <i data-lucide="mail"></i>
+                            <h4>Email</h4>
+                            <p>tenders@dcs.com</p>
+                        </div>
+                        <div class="contact-card">
+                            <i data-lucide="phone"></i>
+                            <h4>Phone</h4>
+                            <p>+1 (555) 123-4567</p>
+                        </div>
+                        <div class="contact-card">
+                            <i data-lucide="clock"></i>
+                            <h4>Business Hours</h4>
+                            <p>Mon - Fri: 9:00 AM - 6:00 PM</p>
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        <form id="contactForm">
+                            <div class="form-group">
+                                <label for="contactSubject">
+                                    <i data-lucide="message-square"></i>
+                                    Subject
+                                </label>
+                                <input type="text" id="contactSubject" placeholder="What's this about?" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="contactMessage">
+                                    <i data-lucide="align-left"></i>
+                                    Message
+                                </label>
+                                <textarea id="contactMessage" rows="6" placeholder="Tell us more..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i data-lucide="send"></i>
+                                <span>Send Message</span>
+                            </button>
+                        </form>
+
+                        <div id="contactSuccess" class="success-message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tender Detail Modal -->
+    <div id="tenderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <button class="modal-close" id="closeModal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>

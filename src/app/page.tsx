@@ -1,65 +1,148 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { format, differenceInDays } from 'date-fns';
+import LoginScreen from '@/components/auth/LoginScreen';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import StatsCards from '@/components/dashboard/StatsCards';
+import TendersTable from '@/components/dashboard/TendersTable';
+import SubmittedTendersTable from '@/components/dashboard/SubmittedTendersTable';
+import SubmitRequirementsForm from '@/components/forms/SubmitRequirementsForm';
+import ContactForm from '@/components/forms/ContactForm';
+import Modal from '@/components/ui/Modal';
+import { tenderData, submittedTendersData } from '@/data/mockData';
+import { Tender } from '@/types';
 
 export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeTab, setActiveTab] = useState('tenders');
+  const [selectedTender, setSelectedTender] = useState<Tender | null>(null);
+
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+  }
+
+  const activeTendersCount = tenderData.filter(t => new Date(t.deadline) > new Date()).length;
+  const completedTendersCount = tenderData.filter(t => t.status === 'submitted').length;
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'tenders':
+        return (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-gray-900">Active Tenders & RFPs</h3>
+              <div className="mt-4">
+                <StatsCards 
+                  activeCount={activeTendersCount} 
+                  completedCount={completedTendersCount} 
+                />
+              </div>
+            </div>
+            <TendersTable 
+              tenders={tenderData} 
+              onView={setSelectedTender} 
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          </div>
+        );
+      case 'submitted':
+        return <SubmittedTendersTable tenders={submittedTendersData} />;
+      case 'submit':
+        return <SubmitRequirementsForm />;
+      case 'contact':
+        return <ContactForm />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <>
+      <DashboardLayout
+        onLogout={() => {
+          setIsAuthenticated(false);
+          setActiveTab('tenders');
+        }}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      >
+        {renderContent()}
+      </DashboardLayout>
+
+      <Modal
+        isOpen={!!selectedTender}
+        onClose={() => setSelectedTender(null)}
+        title={selectedTender?.name || ''}
+      >
+        {selectedTender && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">
+                  Date Submitted to Us
+                </label>
+                <div className="text-gray-900">
+                  {format(new Date(selectedTender.dateSubmitted), 'MMMM d, yyyy')}
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">
+                  Deadline
+                </label>
+                <div className="text-gray-900">
+                  {format(new Date(selectedTender.deadline), 'MMMM d, yyyy HH:mm')}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">
+                  Our Submission Date
+                </label>
+                <div className="text-gray-900">
+                  {selectedTender.ourSubmissionDate ? (
+                    <>
+                      {format(new Date(selectedTender.ourSubmissionDate), 'MMMM d, yyyy HH:mm')}
+                      <span className="text-sm text-green-600 block">
+                        ({differenceInDays(new Date(selectedTender.deadline), new Date(selectedTender.ourSubmissionDate))} days before deadline)
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-yellow-600 font-medium">Not yet submitted</span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">
+                  Quoted Amount
+                </label>
+                <div className="text-gray-900 font-bold text-lg">
+                  ${selectedTender.quotedAmount.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-100 pt-4">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">
+                Description
+              </label>
+              <div className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
+                {selectedTender.description}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">
+                Requirements
+              </label>
+              <div className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
+                {selectedTender.requirements}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </>
   );
 }
