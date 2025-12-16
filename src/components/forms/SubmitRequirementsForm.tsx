@@ -12,11 +12,14 @@ import {
   RiFileLine,
   RiCheckboxCircleLine
 } from 'react-icons/ri';
-import Button from '../ui/Button';
+import { Button } from '../ui/button';
+import { CustomDateTimePicker } from '../ui/CustomDateTimePicker';
 import { supabase } from '@/lib/supabase';
 
 export default function SubmitRequirementsForm() {
   const [files, setFiles] = useState<File[]>([]);
+  const [date, setDate] = useState<Date>();
+  const [time, setTime] = useState('12:00');
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,13 +40,23 @@ export default function SubmitRequirementsForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!date) {
+      setError('Please select a submission deadline.');
+      return;
+    }
+    
     setIsLoading(true);
     setError('');
 
     const formData = new FormData(e.target as HTMLFormElement);
     const tenderName = formData.get('tenderName') as string;
-    const deadline = formData.get('deadline') as string;
     const description = formData.get('description') as string;
+
+    // Combine date and time
+    const [hours, minutes] = time.split(':').map(Number);
+    const submissionDate = new Date(date);
+    submissionDate.setHours(hours || 0);
+    submissionDate.setMinutes(minutes || 0);
 
     try {
       const uploadedFiles = [];
@@ -78,7 +91,7 @@ export default function SubmitRequirementsForm() {
         .from('requirements_submissions')
         .insert({
           tender_name: tenderName,
-          deadline: new Date(deadline).toISOString(),
+          deadline: submissionDate.toISOString(),
           description: description,
           files: uploadedFiles
         });
@@ -87,6 +100,8 @@ export default function SubmitRequirementsForm() {
 
       setIsSuccess(true);
       setFiles([]);
+      setDate(undefined);
+      setTime('12:00');
       (e.target as HTMLFormElement).reset();
       
       setTimeout(() => setIsSuccess(false), 5000);
@@ -126,12 +141,14 @@ export default function SubmitRequirementsForm() {
               <RiCalendarLine className="text-gray-400" size={18} />
               Submission Deadline
             </label>
-            <input 
-              name="deadline"
-              type="datetime-local" 
-              required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-sans"
-            />
+            <div className="max-w-md">
+              <CustomDateTimePicker 
+                date={date} 
+                setDate={setDate} 
+                time={time} 
+                setTime={setTime} 
+              />
+            </div>
           </div>
 
           <div>

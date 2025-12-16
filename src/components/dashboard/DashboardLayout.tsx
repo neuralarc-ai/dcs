@@ -8,7 +8,7 @@ import {
   RiLogoutBoxLine,
   RiFileTextLine
 } from 'react-icons/ri';
-import Button from '../ui/Button';
+import { Button } from '../ui/button';
 
 interface DashboardLayoutProps {
   onLogout: () => void;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { RiFileTextLine, RiEyeLine, RiEyeOffLine, RiLoginBoxLine } from 'react-icons/ri';
-import Button from '../ui/Button';
+import { Button } from '../ui/button';
 import { supabase } from '@/lib/supabase';
 
 interface LoginScreenProps {

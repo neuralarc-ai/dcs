@@ -10,7 +10,7 @@ import {
   RiSendPlane2Line,
   RiCheckboxCircleLine
 } from 'react-icons/ri';
-import Button from '../ui/Button';
+import { Button } from '../ui/button';
 import { supabase } from '@/lib/supabase';
 
 export default function ContactForm() {
