@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import LoginScreen from '@/components/auth/LoginScreen';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -10,20 +10,63 @@ import SubmittedTendersTable from '@/components/dashboard/SubmittedTendersTable'
 import SubmitRequirementsForm from '@/components/forms/SubmitRequirementsForm';
 import ContactForm from '@/components/forms/ContactForm';
 import Modal from '@/components/ui/Modal';
-import { tenderData, submittedTendersData } from '@/data/mockData';
-import { Tender } from '@/types';
+import { Tender, SubmittedTender } from '@/types';
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('tenders');
   const [selectedTender, setSelectedTender] = useState<Tender | null>(null);
+  
+  const [tenders, setTenders] = useState<Tender[]>([]);
+  const [submittedTenders, setSubmittedTenders] = useState<SubmittedTender[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch data when authenticated and tab changes
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      if (activeTab === 'tenders') {
+        const { data } = await supabase
+          .from('tenders')
+          .select('*')
+          .order('deadline', { ascending: true });
+        
+        if (data) setTenders(data as Tender[]);
+      } else if (activeTab === 'submitted') {
+        const { data } = await supabase
+          .from('submitted_tenders')
+          .select('*')
+          .order('date_submitted', { ascending: false });
+          
+        if (data) setSubmittedTenders(data as SubmittedTender[]);
+      }
+      setIsLoading(false);
+    };
+
+    fetchData();
+
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('public:tenders')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tenders' }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated, activeTab]);
 
   if (!isAuthenticated) {
     return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
   }
 
-  const activeTendersCount = tenderData.filter(t => new Date(t.deadline) > new Date()).length;
-  const completedTendersCount = tenderData.filter(t => t.status === 'submitted').length;
+  const activeTendersCount = tenders.filter(t => new Date(t.deadline) > new Date()).length;
+  const completedTendersCount = tenders.filter(t => t.status === 'submitted').length;
 
   const renderContent = () => {
     switch (activeTab) {
@@ -39,14 +82,26 @@ export default function Home() {
                 />
               </div>
             </div>
-            <TendersTable 
-              tenders={tenderData} 
-              onView={setSelectedTender} 
-            />
+            {isLoading ? (
+              <div className="flex justify-center p-12">
+                <div className="animate-spin h-8 w-8 border-4 border-green-500 border-t-transparent rounded-full"></div>
+              </div>
+            ) : (
+              <TendersTable 
+                tenders={tenders} 
+                onView={setSelectedTender} 
+              />
+            )}
           </div>
         );
       case 'submitted':
-        return <SubmittedTendersTable tenders={submittedTendersData} />;
+        return isLoading ? (
+          <div className="flex justify-center p-12">
+            <div className="animate-spin h-8 w-8 border-4 border-green-500 border-t-transparent rounded-full"></div>
+          </div>
+        ) : (
+          <SubmittedTendersTable tenders={submittedTenders} />
+        );
       case 'submit':
         return <SubmitRequirementsForm />;
       case 'contact':
@@ -82,7 +137,7 @@ export default function Home() {
                   Date Submitted to Us
                 </label>
                 <div className="text-gray-900">
-                  {format(new Date(selectedTender.dateSubmitted), 'MMMM d, yyyy')}
+                  {format(new Date(selectedTender.date_submitted), 'MMMM d, yyyy')}
                 </div>
               </div>
               
@@ -100,11 +155,11 @@ export default function Home() {
                   Our Submission Date
                 </label>
                 <div className="text-gray-900">
-                  {selectedTender.ourSubmissionDate ? (
+                  {selectedTender.our_submission_date ? (
                     <>
-                      {format(new Date(selectedTender.ourSubmissionDate), 'MMMM d, yyyy HH:mm')}
+                      {format(new Date(selectedTender.our_submission_date), 'MMMM d, yyyy HH:mm')}
                       <span className="text-sm text-green-600 block">
-                        ({differenceInDays(new Date(selectedTender.deadline), new Date(selectedTender.ourSubmissionDate))} days before deadline)
+                        ({differenceInDays(new Date(selectedTender.deadline), new Date(selectedTender.our_submission_date))} days before deadline)
                       </span>
                     </>
                   ) : (
@@ -118,7 +173,7 @@ export default function Home() {
                   Quoted Amount
                 </label>
                 <div className="text-gray-900 font-bold text-lg">
-                  ${selectedTender.quotedAmount.toLocaleString()}
+                  ${selectedTender.quoted_amount.toLocaleString()}
                 </div>
               </div>
             </div>

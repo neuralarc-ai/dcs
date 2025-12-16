@@ -13,11 +13,13 @@ import {
   RiCheckboxCircleLine
 } from 'react-icons/ri';
 import Button from '../ui/Button';
+import { supabase } from '@/lib/supabase';
 
 export default function SubmitRequirementsForm() {
   const [files, setFiles] = useState<File[]>([]);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,19 +35,67 @@ export default function SubmitRequirementsForm() {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+    setError('');
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const tenderName = formData.get('tenderName') as string;
+    const deadline = formData.get('deadline') as string;
+    const description = formData.get('description') as string;
+
+    try {
+      const uploadedFiles = [];
+
+      // Upload files
+      for (const file of files) {
+        const fileExt = file.name.split('.').pop();
+        const randomString = Math.random().toString(36).substring(2, 15);
+        const timestamp = Date.now();
+        const fileName = `${timestamp}-${randomString}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('documents')
+          .getPublicUrl(filePath);
+
+        uploadedFiles.push({
+          name: file.name,
+          url: publicUrl,
+          size: file.size
+        });
+      }
+
+      // Insert submission record
+      const { error: insertError } = await supabase
+        .from('requirements_submissions')
+        .insert({
+          tender_name: tenderName,
+          deadline: new Date(deadline).toISOString(),
+          description: description,
+          files: uploadedFiles
+        });
+
+      if (insertError) throw insertError;
+
       setIsSuccess(true);
-      setIsLoading(false);
       setFiles([]);
       (e.target as HTMLFormElement).reset();
       
       setTimeout(() => setIsSuccess(false), 5000);
-    }, 1500);
+    } catch (err: unknown) {
+      setError('Failed to submit. Please try again.');
+      console.error('Submission error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -63,6 +113,7 @@ export default function SubmitRequirementsForm() {
               Tender / RFP Name
             </label>
             <input 
+              name="tenderName"
               type="text" 
               required
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
@@ -76,6 +127,7 @@ export default function SubmitRequirementsForm() {
               Submission Deadline
             </label>
             <input 
+              name="deadline"
               type="datetime-local" 
               required
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-sans"
@@ -88,6 +140,7 @@ export default function SubmitRequirementsForm() {
               Description / Notes
             </label>
             <textarea 
+              name="description"
               rows={4}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all resize-y"
               placeholder="Add any additional details or requirements"
@@ -145,6 +198,12 @@ export default function SubmitRequirementsForm() {
             <RiSendPlane2Line size={20} />
             <span>Submit Requirements</span>
           </Button>
+          
+          {error && (
+            <div className="text-red-500 text-sm font-medium text-center">
+              {error}
+            </div>
+          )}
         </form>
 
         {isSuccess && (
@@ -157,4 +216,3 @@ export default function SubmitRequirementsForm() {
     </div>
   );
 }
-

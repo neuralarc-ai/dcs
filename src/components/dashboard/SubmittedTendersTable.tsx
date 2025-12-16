@@ -65,18 +65,20 @@ export default function SubmittedTendersTable({ tenders }: SubmittedTendersTable
               return (
                 <tr key={tender.id} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
-                    {format(new Date(tender.dateSubmitted), 'MMM d, yyyy')}
+                    {format(new Date(tender.date_submitted), 'MMM d, yyyy')}
                   </td>
                   <td className="p-4 text-sm font-semibold text-gray-900">
                     {tender.name}
                   </td>
                   <td className="p-4">
                     <a 
-                      href={tender.documentUrl}
+                      href={tender.document_url}
                       className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:text-green-600 hover:border-green-200 hover:bg-green-50 transition-all group"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
                       <RiDownloadLine className="text-gray-400 group-hover:text-green-500" />
-                      {tender.documentName}
+                      {tender.document_name}
                     </a>
                   </td>
                   <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
@@ -97,4 +99,3 @@ export default function SubmittedTendersTable({ tenders }: SubmittedTendersTable
     </div>
   );
 }
-

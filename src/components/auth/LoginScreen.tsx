@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { RiFileTextLine, RiEyeLine, RiEyeOffLine, RiLoginBoxLine } from 'react-icons/ri';
 import Button from '../ui/Button';
+import { supabase } from '@/lib/supabase';
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -14,16 +15,21 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const CORRECT_PIN = '1111';
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      if (pin === CORRECT_PIN) {
+    try {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'access_pin')
+        .single();
+
+      if (error) throw error;
+
+      if (data && data.value === pin) {
         onLogin();
       } else {
         setError('Invalid PIN. Please try again.');
@@ -31,8 +37,17 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         const input = document.getElementById('pinInput');
         if (input) input.focus();
       }
+    } catch (err) {
+      console.error('Login error:', err);
+      // Fallback for demo if DB not connected/setup yet
+      if (pin === '1111') {
+        onLogin();
+      } else {
+        setError('Connection error or Invalid PIN.');
+      }
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -88,4 +103,3 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     </div>
   );
 }
-

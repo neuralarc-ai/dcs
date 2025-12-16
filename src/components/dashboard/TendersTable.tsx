@@ -54,8 +54,8 @@ export default function TendersTable({ tenders, onView }: TendersTableProps) {
       );
     }
     
-    const daysEarly = tender.ourSubmissionDate 
-      ? differenceInDays(new Date(tender.deadline), new Date(tender.ourSubmissionDate)) 
+    const daysEarly = tender.our_submission_date 
+      ? differenceInDays(new Date(tender.deadline), new Date(tender.our_submission_date)) 
       : 0;
       
     return (
@@ -88,7 +88,7 @@ export default function TendersTable({ tenders, onView }: TendersTableProps) {
               return (
                 <tr key={tender.id} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
-                    {format(new Date(tender.dateSubmitted), 'MMM d, yyyy')}
+                    {format(new Date(tender.date_submitted), 'MMM d, yyyy')}
                   </td>
                   <td className="p-4 text-sm font-semibold text-gray-900">
                     {tender.name}
@@ -103,7 +103,7 @@ export default function TendersTable({ tenders, onView }: TendersTableProps) {
                     </span>
                   </td>
                   <td className="p-4 text-sm font-bold text-gray-900 whitespace-nowrap">
-                    ${tender.quotedAmount.toLocaleString()}
+                    ${tender.quoted_amount.toLocaleString()}
                   </td>
                   <td className="p-4 whitespace-nowrap">
                     {getStatusBadge(tender)}
@@ -123,4 +123,3 @@ export default function TendersTable({ tenders, onView }: TendersTableProps) {
     </div>
   );
 }
-

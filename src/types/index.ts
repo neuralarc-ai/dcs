@@ -1,10 +1,11 @@
 export interface Tender {
   id: number;
-  dateSubmitted: string;
+  created_at?: string;
+  date_submitted: string;
   name: string;
   deadline: string;
-  quotedAmount: number;
-  ourSubmissionDate: string | null;
+  quoted_amount: number;
+  our_submission_date: string | null;
   status: 'submitted' | 'pending';
   description: string;
   requirements: string;
@@ -12,10 +13,10 @@ export interface Tender {
 
 export interface SubmittedTender {
   id: number;
-  dateSubmitted: string;
+  created_at?: string;
+  date_submitted: string;
   name: string;
   deadline: string;
-  documentUrl: string;
-  documentName: string;
+  document_url: string;
+  document_name: string;
 }
-

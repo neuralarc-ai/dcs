@@ -11,23 +11,42 @@ import {
   RiCheckboxCircleLine
 } from 'react-icons/ri';
 import Button from '../ui/Button';
+import { supabase } from '@/lib/supabase';
 
 export default function ContactForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const subject = formData.get('subject') as string;
+    const message = formData.get('message') as string;
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const { error: insertError } = await supabase
+        .from('contact_messages')
+        .insert({
+          subject,
+          message
+        });
+
+      if (insertError) throw insertError;
+
       setIsSuccess(true);
-      setIsLoading(false);
       (e.target as HTMLFormElement).reset();
       
       setTimeout(() => setIsSuccess(false), 5000);
-    }, 1500);
+    } catch (err: unknown) {
+      setError('Failed to send message. Please try again.');
+      console.error('Contact error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,6 +88,7 @@ export default function ContactForm() {
                   Subject
                 </label>
                 <input 
+                  name="subject"
                   type="text" 
                   required
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
@@ -82,6 +102,7 @@ export default function ContactForm() {
                   Message
                 </label>
                 <textarea 
+                  name="message"
                   required
                   rows={6}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all resize-y"
@@ -93,6 +114,12 @@ export default function ContactForm() {
                 <RiSendPlane2Line size={20} />
                 <span>Send Message</span>
               </Button>
+              
+              {error && (
+                <div className="text-red-500 text-sm font-medium text-center">
+                  {error}
+                </div>
+              )}
             </form>
 
             {isSuccess && (
@@ -107,4 +134,3 @@ export default function ContactForm() {
     </div>
   );
 }
-
